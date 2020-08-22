@@ -53,6 +53,8 @@ impl AssetLoader<Map> for TiledMapLoader {
             if !layer.visible {
                 continue;
             }
+            let width_offset = layer.offset_x;
+            let height_offset = -layer.offset_y;
             let mut chunks = Vec::new();
             // 32 x 32 tile chunk sizes
             for chunk_x in 0..chunk_size_x {
@@ -71,14 +73,12 @@ impl AssetLoader<Map> for TiledMapLoader {
                                 && lookup_y < map.height as usize
                             {
                                 // New Tiled crate code:
-                                // let map_tile = match &layer.tiles {
-                                //     tiled::LayerData::Finite(tiles) => {
-                                //         &tiles[lookup_y][lookup_x]
-                                //     },
-                                //     _ => panic!("Infinte maps not supported"),
-                                // };
+                                let map_tile = match &layer.tiles {
+                                    tiled::LayerData::Finite(tiles) => &tiles[lookup_y][lookup_x],
+                                    _ => panic!("Infinte maps not supported"),
+                                };
 
-                                let map_tile = layer.tiles[lookup_y][lookup_x];
+                                //let map_tile = layer.tiles[lookup_y][lookup_x];
 
                                 let tile = map_tile.gid;
 
@@ -106,13 +106,21 @@ impl AssetLoader<Map> for TiledMapLoader {
                                         );
 
                                         let end = map_2d_to_ortho(
-                                            Vec2::new(lookup_x as f32, lookup_y as f32),
+                                            Vec2::new(
+                                                lookup_x as f32 + width_offset,
+                                                lookup_y as f32 + height_offset,
+                                            ),
                                             tile_width,
                                             tile_height,
                                             1.0,
                                         );
 
-                                        (start.x(), end.x(), start.y(), end.y())
+                                        (
+                                            start.x() + width_offset,
+                                            end.x() + width_offset,
+                                            start.y() + height_offset,
+                                            end.y() + height_offset,
+                                        )
                                     }
                                     tiled::Orientation::Isometric => {
                                         let start = map_2d_to_iso(
@@ -133,7 +141,12 @@ impl AssetLoader<Map> for TiledMapLoader {
                                             2.0,
                                         );
 
-                                        (start.x(), end.x(), start.y(), end.y())
+                                        (
+                                            start.x() + width_offset,
+                                            end.x() + width_offset,
+                                            start.y() + height_offset,
+                                            end.y() + height_offset,
+                                        )
                                     }
                                     _ => panic!("Unsupported orientation {:?}", map.orientation),
                                 };
