@@ -106,10 +106,7 @@ impl AssetLoader<Map> for TiledMapLoader {
                                         );
 
                                         let end = map_2d_to_ortho(
-                                            Vec2::new(
-                                                lookup_x as f32 + width_offset,
-                                                lookup_y as f32 + height_offset,
-                                            ),
+                                            Vec2::new(lookup_x as f32, lookup_y as f32),
                                             tile_width,
                                             tile_height,
                                             1.0,
